@@ -14,33 +14,33 @@ await useMultiFileAuthState("auth")
 
 const sock = makeWASocket({
 auth: state,
-browser: ["Bot","Chrome","1.0"],
-logger: pino({ level: "silent" })
+browser:["Bot","Chrome","1.0"],
+logger:pino({ level:"silent" })
 })
 
 sock.ev.on("creds.update", saveCreds)
 
-// CONEXIUNE
-sock.ev.on("connection.update", async (update) => {
+sock.ev.on("connection.update", async () => {
 
-console.log("STATUS:", update.connection)
-
-// dacă NU e logat → pairing code
 if(!sock.authState.creds.registered){
 
 const phoneNumber = "40760335381"
 
+console.log("TRYING PAIRING...")
+
 setTimeout(async () => {
 
-try{
+try {
 
-const code = await sock.requestPairingCode(phoneNumber)
+const code =
+await sock.requestPairingCode(phoneNumber)
 
-console.log("PAIRING CODE:")
-console.log(code)
+console.log("\nPAIRING CODE:\n", code)
 
-}catch(e){
-console.log("ERROR PAIRING:", e)
+} catch (e) {
+
+console.log("PAIRING ERROR:", e?.message || e)
+
 }
 
 }, 3000)
