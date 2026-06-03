@@ -1,6 +1,7 @@
 const {
 default: makeWASocket,
-useMultiFileAuthState
+useMultiFileAuthState,
+DisconnectReason
 } = require("@whiskeysockets/baileys")
 
 const pino = require("pino")
@@ -23,12 +24,32 @@ sock.ev.on("creds.update", saveCreds)
 
 sock.ev.on("connection.update",(update)=>{
 
-const { connection } = update
+const connection = update?.connection
+const lastDisconnect = update?.lastDisconnect
+
+if(!connection){
+console.log("WAITING CONNECTION...")
+return
+}
 
 console.log("STATUS:", connection)
 
 if(connection === "open"){
 console.log("CONNECTED 🎉")
+}
+
+if(connection === "close"){
+
+const reason =
+lastDisconnect?.error?.output?.statusCode
+
+console.log("DISCONNECTED:", reason)
+
+// restart safe (dar cu delay)
+if(reason !== DisconnectReason.loggedOut){
+setTimeout(() => start(), 5000)
+}
+
 }
 
 })
