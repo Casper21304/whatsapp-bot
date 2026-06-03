@@ -125,11 +125,21 @@ await sock.sendMessage(from,{text:msg})
 
 })
 
-sock.ev.on("connection.update",(update)=>{
+sock.ev.on("connection.update", (update) => {
 
-const { connection, lastDisconnect } = update
+const connection = update.connection
+const lastDisconnect = update.lastDisconnect
 
 console.log("STATUS:", connection)
+
+if(connection === undefined){
+console.log("WAITING CONNECTION...")
+return
+}
+
+if(connection === "open"){
+console.log("CONNECTED 🎉 BOT PRO READY")
+}
 
 if(connection === "close"){
 
@@ -138,18 +148,10 @@ lastDisconnect?.error?.output?.statusCode
 
 console.log("DISCONNECTED:", reason)
 
-if(reason !== DisconnectReason.loggedOut){
+if(reason !== 401){
 start()
 }
 
-}
-
-if(connection === "open"){
-console.log("CONNECTED 🎉 BOT PRO READY")
 }
 
 })
-
-}
-
-start()
