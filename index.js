@@ -47,6 +47,48 @@ browser:["Bot","Chrome","1.0"],
 logger:pino({ level:"silent" }),
 printQRInTerminal:false
 })
+sock.ev.on("messages.upsert", async ({ messages }) => {
+
+const m = messages[0]
+if(!m.message) return
+
+const from = m.key.remoteJid
+const sender = m.key.participant || m.key.remoteJid
+
+const text =
+m.message.conversation ||
+m.message.extendedTextMessage?.text
+
+if(!text) return
+
+console.log("📩 MSG:", text)
+
+// HELP
+if(text === "/help"){
+await sock.sendMessage(from,{
+text:`🤖 COMENZI:
+
+/help
+/glume
+/top`
+})
+}
+
+// GLUME
+if(text === "/glume"){
+await sock.sendMessage(from,{
+text:"😂 Glumă: codul merge doar când nu te uiți la el."
+})
+}
+
+// TOP
+if(text === "/top"){
+await sock.sendMessage(from,{
+text:"📊 Bot activ ✔ funcționează corect"
+})
+}
+
+})
 
 sock.ev.on("creds.update", saveCreds)
 
