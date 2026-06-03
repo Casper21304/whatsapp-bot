@@ -14,11 +14,30 @@ async function start() {
         logger: pino({ level: "silent" })
     })
 
-    sock.ev.on("creds.update", saveCreds)
+    
+const QRCode = require("qrcode")
 
-    sock.ev.on("connection.update", (c) => {
-        console.log("STATUS:", c.connection)
-    })
+sock.ev.on("connection.update", async (update) => {
+
+const { connection, qr } = update
+
+console.log("STATUS:", connection)
+
+if(qr){
+
+console.log("QR RECEIVED")
+
+await QRCode.toString(
+qr,
+{
+type:"terminal",
+small:true
+}
+).then(console.log)
+
+}
+
+})
 
     console.log("WAITING QR...")
 }
