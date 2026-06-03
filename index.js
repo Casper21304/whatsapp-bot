@@ -1,17 +1,18 @@
 const {
 default: makeWASocket,
-useMultiFileAuthState
+useMultiFileAuthState,
+DisconnectReason
 } = require("@whiskeysockets/baileys")
 
 const pino = require("pino")
-const QRCode = require("qrcode")
 const express = require("express")
 
 const app = express()
+
 let latestQR = null
 
 app.get("/", (req,res)=>{
-res.send("<h1>Bot online</h1><p>QR: /qr</p>")
+res.send("Bot online 🚀 - QR la /qr")
 })
 
 app.get("/qr", (req,res)=>{
@@ -30,26 +31,43 @@ await useMultiFileAuthState("auth")
 
 const sock = makeWASocket({
 auth: state,
-browser:["Bot","Chrome","1.0"],
-logger:pino({ level:"silent" })
+browser: ["Bot","Chrome","1.0"],
+logger: pino({ level: "silent" }),
+printQRInTerminal: false
 })
 
 sock.ev.on("creds.update", saveCreds)
 
 sock.ev.on("connection.update", async (update) => {
 
-const { connection, qr } = update
+const { connection, qr, lastDisconnect } = update
 
 console.log("STATUS:", connection)
 
-if(qr){
+if(qr && !latestQR){
 
-latestQR = await QRCode.toDataURL(qr)
-console.log("QR UPDATED → open /qr")
+latestQR = qr
+
+console.log("QR READY → open /qr")
 }
 
 if(connection === "open"){
 console.log("CONNECTED 🎉")
+latestQR = null
+}
+
+if(connection === "close"){
+
+const reason =
+lastDisconnect?.error?.output?.statusCode
+
+console.log("DISCONNECTED:", reason)
+
+if(reason !== DisconnectReason.loggedOut){
+console.log("RESTARTING...")
+start()
+}
+
 }
 
 })
