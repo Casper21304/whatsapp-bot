@@ -1,12 +1,6 @@
 const express = require("express")
 const app = express()
 
-app.get("/", (req,res)=>{
-res.send("Bot online 🚀")
-})
-
-const PORT = process.env.PORT || 3000
-app.listen(PORT, ()=>console.log("WEB ON PORT", PORT))
 const {
 default: makeWASocket,
 useMultiFileAuthState,
@@ -14,6 +8,20 @@ DisconnectReason
 } = require("@whiskeysockets/baileys")
 
 const pino = require("pino")
+
+// ======================
+// WEB SERVER (Render fix)
+// ======================
+app.get("/", (req,res)=>{
+res.send("🤖 WhatsApp Bot is running")
+})
+
+const PORT = process.env.PORT || 3000
+app.listen(PORT, ()=>console.log("WEB ON PORT", PORT))
+
+// ======================
+// BOT LOGIC
+// ======================
 
 const userMessages = {}
 
@@ -33,9 +41,7 @@ logger:pino({ level:"silent" })
 sock.ev.on("creds.update", saveCreds)
 
 
-// ======================
-// CONNECTION SAFE
-// ======================
+// CONNECTION
 sock.ev.on("connection.update",(update)=>{
 
 const connection = update?.connection
@@ -46,7 +52,7 @@ console.log("STATUS:", connection)
 }
 
 if(connection === "open"){
-console.log("CONNECTED 🎉 BOT READY")
+console.log("CONNECTED 🎉")
 }
 
 if(connection === "close"){
@@ -65,9 +71,7 @@ start()
 })
 
 
-// ======================
 // GROUP WELCOME
-// ======================
 sock.ev.on("group-participants.update", async (update)=>{
 
 if(update.action === "add"){
@@ -88,9 +92,7 @@ userMessages[p] = userMessages[p] || 0
 })
 
 
-// ======================
 // MESSAGES + COMMANDS
-// ======================
 sock.ev.on("messages.upsert", async ({ messages })=>{
 
 const m = messages[0]
@@ -105,7 +107,7 @@ m.message.extendedTextMessage?.text
 
 if(!text) return
 
-// TRACK ACTIVITY
+// TRACK
 userMessages[sender] = (userMessages[sender] || 0) + 1
 
 
@@ -126,9 +128,9 @@ text:`🤖 COMENZI:
 if(text === "/glume"){
 
 const jokes = [
-"JavaScript are bug-uri infinite 😂",
-"Debugging = detective work 🔍",
-"Am șters codul și a mers mai bine 🤡"
+"Codul merge doar după 10 restarturi 😂",
+"Bug-ul e feature ascuns 🤡",
+"JavaScript are personalitate 😆"
 ]
 
 await sock.sendMessage(from,{
