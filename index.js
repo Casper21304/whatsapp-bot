@@ -1,3 +1,6 @@
+const express = require("express")
+const QRCode = require("qrcode")
+
 const {
 default: makeWASocket,
 useMultiFileAuthState,
@@ -6,6 +9,31 @@ DisconnectReason
 
 const pino = require("pino")
 
+const app = express()
+
+let qrImage = null
+
+// ================= WEB =================
+app.get("/", (req,res)=>{
+res.send("🤖 WhatsApp Bot Running")
+})
+
+app.get("/qr", (req,res)=>{
+if(!qrImage){
+return res.send("<h2>QR încă nu este gata...</h2>")
+}
+
+res.send(`
+<h2>Scanează QR:</h2>
+<img src="${qrImage}" width="300"/>
+`)
+})
+
+const PORT = process.env.PORT || 3000
+app.listen(PORT, ()=>console.log("WEB ON PORT", PORT))
+
+
+// ================= BOT =================
 async function start(){
 
 console.log("BOT START")
@@ -17,25 +45,26 @@ const sock = makeWASocket({
 auth: state,
 browser:["Bot","Chrome","1.0"],
 logger:pino({ level:"silent" }),
-printQRInTerminal:true
+printQRInTerminal:false
 })
 
 sock.ev.on("creds.update", saveCreds)
 
-sock.ev.on("connection.update",(update)=>{
+sock.ev.on("connection.update", async (update)=>{
 
-const connection = update?.connection
-const lastDisconnect = update?.lastDisconnect
-
-if(!connection){
-console.log("WAITING CONNECTION...")
-return
-}
+const { connection, qr, lastDisconnect } = update
 
 console.log("STATUS:", connection)
 
+// 👉 QR transform în imagine reală
+if(qr){
+qrImage = await QRCode.toDataURL(qr)
+console.log("QR UPDATED → /qr")
+}
+
 if(connection === "open"){
 console.log("CONNECTED 🎉")
+qrImage = null
 }
 
 if(connection === "close"){
@@ -45,9 +74,8 @@ lastDisconnect?.error?.output?.statusCode
 
 console.log("DISCONNECTED:", reason)
 
-// restart safe (dar cu delay)
 if(reason !== DisconnectReason.loggedOut){
-setTimeout(() => start(), 5000)
+start()
 }
 
 }
