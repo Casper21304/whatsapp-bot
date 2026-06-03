@@ -1,77 +1,49 @@
-const { default: makeWASocket, useMultiFileAuthState } = require("@whiskeysockets/baileys")
-const pino = require("pino")
+const {
+default: makeWASocket,
+useMultiFileAuthState
+} = require("@whiskeysockets/baileys")
 
-function rand(arr){
-return arr[Math.floor(Math.random()*arr.length)]
-}
+const pino = require("pino")
 
 async function start(){
 
-console.log("BOT STARTING...")
+console.log("BOT START")
 
-const { state, saveCreds } = await useMultiFileAuthState("auth")
+const { state, saveCreds } =
+await useMultiFileAuthState("auth")
 
 const sock = makeWASocket({
 auth: state,
-printQRInTerminal: true,
 browser: ["Bot","Chrome","1.0"],
 logger: pino({ level: "silent" })
 })
 
 sock.ev.on("creds.update", saveCreds)
 
-sock.ev.on("connection.update",(update)=>{
+// CONEXIUNE
+sock.ev.on("connection.update", async (update) => {
+
 console.log("STATUS:", update.connection)
-})
 
-sock.ev.on("messages.upsert", async ({ messages }) => {
+// dacă NU e logat → pairing code
+if(!sock.authState.creds.registered){
 
-const m = messages[0]
+const phoneNumber = "40760335381"
 
-if(!m.message) return
+setTimeout(async () => {
 
-const text =
-m.message.conversation ||
-m.message.extendedTextMessage?.text
+try{
 
-if(!text) return
+const code = await sock.requestPairingCode(phoneNumber)
 
-const from = m.key.remoteJid
+console.log("PAIRING CODE:")
+console.log(code)
 
-// HELP
-if(text === "/help"){
-await sock.sendMessage(from,{
-text:`🤖 COMENZI:
-
-/help
-/glume
-/compatibilitate`
-})
+}catch(e){
+console.log("ERROR PAIRING:", e)
 }
 
-// GLUME
-if(text === "/glume"){
-
-const jokes = [
-"JavaScript merge doar când vrea el 😆",
-"Bug-ul e feature ascuns 😂",
-"Am șters codul și a mers mai bine 🤡"
-]
-
-await sock.sendMessage(from,{
-text: rand(jokes)
-})
-
-}
-
-// COMPATIBILITATE
-if(text.startsWith("/compatibilitate")){
-
-const percent = Math.floor(Math.random()*100)
-
-await sock.sendMessage(from,{
-text:`💘 Compatibilitate: ${percent}%`
-})
+}, 3000)
 
 }
 
