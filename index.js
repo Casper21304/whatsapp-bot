@@ -1,59 +1,82 @@
-byconsole.log("BOT PORNIT")
-
 const { default: makeWASocket, useMultiFileAuthState } = require("@whiskeysockets/baileys")
 const pino = require("pino")
 
-async function start() {
-    console.log("INIT...")
+function rand(arr){
+return arr[Math.floor(Math.random()*arr.length)]
+}
 
-    const { state, saveCreds } = await useMultiFileAuthState("auth")
+async function start(){
 
-    const { state, saveCreds } = await useMultiFileAuthState("auth")
+console.log("BOT STARTING...")
+
+const { state, saveCreds } = await useMultiFileAuthState("auth")
 
 const sock = makeWASocket({
-    auth: state,
-    browser: ["Bot", "Chrome", "1.0"],
-    logger: pino({ level: "silent" })
+auth: state,
+printQRInTerminal: true,
+browser: ["Bot","Chrome","1.0"],
+logger: pino({ level: "silent" })
 })
 
-if (!sock.authState.creds.registered) {
+sock.ev.on("creds.update", saveCreds)
 
-const phoneNumber = "40760335381"
+sock.ev.on("connection.update",(update)=>{
+console.log("STATUS:", update.connection)
+})
 
-setTimeout(async () => {
+sock.ev.on("messages.upsert", async ({ messages }) => {
 
-const code = await sock.requestPairingCode(phoneNumber)
-console.log("PAIRING CODE:", code)
+const m = messages[0]
 
-}, 3000)
+if(!m.message) return
+
+const text =
+m.message.conversation ||
+m.message.extendedTextMessage?.text
+
+if(!text) return
+
+const from = m.key.remoteJid
+
+// HELP
+if(text === "/help"){
+await sock.sendMessage(from,{
+text:`🤖 COMENZI:
+
+/help
+/glume
+/compatibilitate`
+})
+}
+
+// GLUME
+if(text === "/glume"){
+
+const jokes = [
+"JavaScript merge doar când vrea el 😆",
+"Bug-ul e feature ascuns 😂",
+"Am șters codul și a mers mai bine 🤡"
+]
+
+await sock.sendMessage(from,{
+text: rand(jokes)
+})
 
 }
-    
-const QRCode = require("qrcode")
 
-sock.ev.on("connection.update", async (update) => {
+// COMPATIBILITATE
+if(text.startsWith("/compatibilitate")){
 
-const { connection, qr } = update
+const percent = Math.floor(Math.random()*100)
 
-console.log("STATUS:", connection)
-
-if(qr){
-
-console.log("QR RECEIVED")
-
-await QRCode.toString(
-qr,
-{
-type:"terminal",
-small:true
-}
-).then(console.log)
+await sock.sendMessage(from,{
+text:`💘 Compatibilitate: ${percent}%`
+})
 
 }
 
 })
 
-    console.log("WAITING QR...")
 }
 
 start()
