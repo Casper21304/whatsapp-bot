@@ -1,3 +1,4 @@
+console.log("BOT START")
 const express = require("express")
 const app = express()
 
