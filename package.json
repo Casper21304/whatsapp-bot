@@ -1,14 +1,15 @@
 {
-  "name": "whatsapp-bot",
-  "version": "1.0.0",
-  "main": "index.js",
-  "type": "commonjs",
-  "scripts": {
-    "start": "node index.js"
+  "name":"whatsapp-bot",
+  "version":"1.0.0",
+  "main":"index.js",
+  "type":"commonjs",
+  "scripts":{
+    "start":"node index.js"
   },
-  "dependencies": {
-    "@whiskeysockets/baileys": "latest",
-    "pino": "latest",
-    "express": "latest"
+  "dependencies":{
+    "@whiskeysockets/baileys":"latest",
+    "express":"latest",
+    "pino":"latest",
+    "qrcode":"latest"
   }
 }
