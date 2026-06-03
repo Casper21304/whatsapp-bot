@@ -8,8 +8,8 @@
   },
   "dependencies": {
     "@whiskeysockets/baileys": "latest",
-    "pino": "latest",
     "express": "latest",
-    "qrcode": "latest"
+    "qrcode": "latest",
+    "pino": "latest"
   }
 }
