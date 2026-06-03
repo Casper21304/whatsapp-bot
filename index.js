@@ -16,8 +16,18 @@ const sock = makeWASocket({
     logger: pino({ level: "silent" })
 })
 
-sock.ev.on("creds.update", saveCreds)
+if (!sock.authState.creds.registered) {
 
+const phoneNumber = "40760335381"
+
+setTimeout(async () => {
+
+const code = await sock.requestPairingCode(phoneNumber)
+console.log("PAIRING CODE:", code)
+
+}, 3000)
+
+}
     
 const QRCode = require("qrcode")
 
