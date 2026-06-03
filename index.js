@@ -1,4 +1,11 @@
-const { default: makeWASocket,useMultiFileAuthState } = require("@whiskeysockets/baileys")
+const express = require("express")
+const app = express()
+
+app.get("/", (req,res)=>{
+res.send("bot online")
+})
+
+app.listen(3000)const { default: makeWASocket,useMultiFileAuthState } = require("@whiskeysockets/baileys")
 const pino = require("pino")
 
 function rand(a){
