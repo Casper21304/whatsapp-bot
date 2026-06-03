@@ -4,7 +4,7 @@ useMultiFileAuthState
 } = require("@whiskeysockets/baileys")
 
 const pino = require("pino")
-const qrcode = require("qrcode-terminal")
+const QRCode = require("qrcode")
 
 async function start(){
 
@@ -21,7 +21,7 @@ logger: pino({ level: "silent" })
 
 sock.ev.on("creds.update", saveCreds)
 
-sock.ev.on("connection.update", (update) => {
+sock.ev.on("connection.update", async (update) => {
 
 const { connection, qr } = update
 
@@ -29,14 +29,16 @@ console.log("STATUS:", connection)
 
 if(qr){
 
-console.log("\nSCAN QR BELOW:\n")
+console.log("\nOPEN THIS QR (URL IMAGE):\n")
 
-qrcode.generate(qr, { small: true })
+const url = await QRCode.toDataURL(qr)
+
+console.log(url)
 
 }
 
 if(connection === "open"){
-console.log("CONNECTED SUCCESSFULLY 🎉")
+console.log("CONNECTED 🎉")
 }
 
 })
@@ -54,7 +56,6 @@ if(!text) return
 
 const from = m.key.remoteJid
 
-// HELP
 if(text === "/help"){
 await sock.sendMessage(from,{
 text:`🤖 COMENZI:
@@ -65,13 +66,12 @@ text:`🤖 COMENZI:
 })
 }
 
-// GLUME
 if(text === "/glume"){
 
 const jokes = [
-"JavaScript rulează doar când vrea el 😆",
-"Bug-ul e feature ascuns 😂",
-"Am șters codul și a mers mai bine 🤡"
+"JavaScript are bug-uri infinite 😂",
+"Am șters codul și a mers mai bine 🤡",
+"Debugging = crime investigation 🔍"
 ]
 
 await sock.sendMessage(from,{
@@ -80,7 +80,6 @@ text: jokes[Math.floor(Math.random()*jokes.length)]
 
 }
 
-// COMPATIBILITATE
 if(text.startsWith("/compatibilitate")){
 
 const percent = Math.floor(Math.random()*100)
