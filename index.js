@@ -1,4 +1,4 @@
-console.log("BOT PORNIT")
+byconsole.log("BOT PORNIT")
 
 const { default: makeWASocket, useMultiFileAuthState } = require("@whiskeysockets/baileys")
 const pino = require("pino")
@@ -8,11 +8,15 @@ async function start() {
 
     const { state, saveCreds } = await useMultiFileAuthState("auth")
 
-    const sock = makeWASocket({
-        auth: state,
-        printQRInTerminal: true,
-        logger: pino({ level: "silent" })
-    })
+    const { state, saveCreds } = await useMultiFileAuthState("auth")
+
+const sock = makeWASocket({
+    auth: state,
+    browser: ["Bot", "Chrome", "1.0"],
+    logger: pino({ level: "silent" })
+})
+
+sock.ev.on("creds.update", saveCreds)
 
     
 const QRCode = require("qrcode")
